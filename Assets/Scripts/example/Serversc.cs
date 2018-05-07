@@ -103,9 +103,11 @@ public class Serversc : MonoBehaviour
 			connectThread.Interrupt();  
 			connectThread.Abort();  
 		}  
-		//最後關閉服務器  
-		serverSocket.Close();  
-		print("diconnect");  
+		//最後關閉服務器
+		if (serverSocket != null) {
+			serverSocket.Close ();  
+			print ("diconnect");  
+		}
 	}  
 
 	// Use this for initialization  

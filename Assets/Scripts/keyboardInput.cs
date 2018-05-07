@@ -4,45 +4,45 @@ using UnityEngine;
 
 public class keyboardInput : MonoBehaviour {
 
-	public GameObject target ;
+	public GameObject baseShooter ;
+	public GameObject baseBullet;
 
-	public GameObject bullet;
+	GameObject shooter;
 
-	float max_left = -10;
-	float max_right = 10;
-	float max_near = 0;
-	float max_far = 8;
+	float max_left = 0;
+	float max_right = 40;
+	float max_near = -20;
+	float max_far = 0;
 
-	float speed = 10.0f;
+	float speed = 20.0f;
+	Vector3 shhoterInitLoc = new Vector3(0, 15.5f,0);
 
 	// Use this for initialization
 	void Start () {
-		
+		shooter = Instantiate (baseShooter, shhoterInitLoc, Quaternion.identity);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
 		if (Input.GetKey (KeyCode.A)) {
-			if(target.transform.position.x >= max_left)
-				target.transform.Translate (-speed * Time.deltaTime, 0, 0);
+			if(shooter.transform.position.x >= max_left)
+				shooter.transform.Translate (-speed * Time.deltaTime, 0, 0);
 		}
 		if (Input.GetKey (KeyCode.D)) {
-			if(target.transform.position.x <= max_right)
-				target.transform.Translate (speed * Time.deltaTime, 0, 0);
+			if(shooter.transform.position.x <= max_right)
+				shooter.transform.Translate (speed * Time.deltaTime, 0, 0);
 		}
 		if (Input.GetKey (KeyCode.W)) {
-			if(target.transform.position.z <= max_far)
-				target.transform.Translate (0, 0, speed * Time.deltaTime);
+			if(shooter.transform.position.z <= max_far)
+				shooter.transform.Translate (0, 0, speed * Time.deltaTime);
 		}
 		if (Input.GetKey (KeyCode.S)) {
-			if(target.transform.position.z >= max_near)
-				target.transform.Translate (0, 0, -speed * Time.deltaTime);
+			if(shooter.transform.position.z >= max_near)
+				shooter.transform.Translate (0, 0, -speed * Time.deltaTime);
 		}
 		if (Input.GetButtonDown ("Fire1")) {
-			GameObject temp = Instantiate (bullet);
-			temp.transform.position = target.transform.position;
-
+			GameObject temp = Instantiate (baseBullet, shooter.transform.position, Quaternion.identity);
 		}
 	}
 

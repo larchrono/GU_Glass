@@ -60,8 +60,9 @@ public class CameraController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		//When camera raw data receive
-		TCPClient.recievePosition += OnPositionChanged;
+        //When camera raw data receive
+		//MyTcpClient.RecieveTouchEvent += OnPositionChanged;
+
 		//when orientation raw data recieve
 		CallJava.recieveOrientation += OnViewChanged;
 
