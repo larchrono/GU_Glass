@@ -5,13 +5,9 @@ using UnityEngine;
 public class TouchController : MonoBehaviour {
 
 	public GameObject iconPrefab;
+	public GameObject exploreParticle;
 
-	int touchScreenWidth = 640;
-	int touchScreeHeight = 480;
-
-	int goundWidth = 40;
-	int goundHeight = 20;
-	float iconHeight = 15.5f;
+	float iconHeight = 25.5f;
 
 	//To run Method in Unity main Thread
 	delegate void NetworkThreadWork();
@@ -32,23 +28,23 @@ public class TouchController : MonoBehaviour {
 	}
 
 	void OnRecieveTouch(ArgsPosition[] args){
-		Debug.Log ("Recieve data and Trigger Event");
+		//Debug.Log ("Recieve data and Trigger Event");
 
 		functionCallback += delegate {
 			for (int i = 0; i < args.Length; i++) {
-				GameObject temp = Instantiate (iconPrefab , new Vector3 (RectX (args [i].x), iconHeight , RectZ (args [i].y)), Quaternion.identity);
-
-				Debug.Log("x:" + RectX (args [i].x) + " , y:" + RectZ (args [i].y));
+				Instantiate (iconPrefab , new Vector3 (RectX (args [i].x), iconHeight , RectZ (args [i].y)), Quaternion.identity);
+				Destroy(Instantiate (exploreParticle , new Vector3 (RectX (args [i].x), iconHeight , RectZ (args [i].y)), Quaternion.Euler(new Vector3(90,0,0))) as GameObject,3f);
+				//Debug.Log("x:" + RectX (args [i].x) + " , y:" + RectZ (args [i].y));
 			}
 		};
 	}
 
 	//In Unity , (0,0) is at left bottom
 	float RectX(int src){
-		return ((src * 1.0f) / touchScreenWidth) * goundWidth;
+		return ((src * 1.0f) / ResolutioController.current.touchScreenWidth) * GlobalVars.GoundWidth;
 	}
 	float RectZ(int src){
 		//In openCV Y is negative
-		return ((src * 1.0f) / touchScreeHeight) * goundHeight - goundHeight;
+		return ((src * 1.0f) / ResolutioController.current.touchScreenHeight) *  GlobalVars.GoundHeight - GlobalVars.GoundHeight;
 	}
 }

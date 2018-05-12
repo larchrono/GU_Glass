@@ -12,9 +12,16 @@ public class MyTcpClient : MonoBehaviour {
 	public delegate void RecieveTouchEvent(ArgsPosition[] args);
 	public static event RecieveTouchEvent recieveTouchEvent;
 
+	public delegate void RecieveResolution(int w, int h);
+	public static event RecieveResolution recieveResolution;
+
+	public delegate void RecievePositon(ArgsPosition[] args);
+	public static event RecievePositon recievePositionEvent;
+
 	public static MyTcpClient curent;
 
 	public InputField ifield;
+
 	Button _sender;
 	bool turnOnSender = false;
 
@@ -105,6 +112,9 @@ public class MyTcpClient : MonoBehaviour {
 				}
 
 				responseData = System.Text.Encoding.UTF8.GetString(data, 0, bytes);
+				DebugSystem.current.threadWorkStores += delegate {
+					DebugSystem.current.ShowMessage (responseData);
+				};
 
 				//Recieve Data Will Be   245,135,90[/TCP]   , str 不會包含[/TCP]
 				char delimiter = ',';
@@ -112,7 +122,43 @@ public class MyTcpClient : MonoBehaviour {
 				string[] clearString = responseData.Split (delimiterEnd);  // => 245,135,90
 				string[] substrings = clearString [0].Split (delimiter); // => 245  135  90
 
-				if (substrings.Length > 2) {
+				// rs,x,y
+				if (substrings [0] == "rs" && substrings.Length >= 3) {
+					int w = 0;
+					int h = 0;
+					int.TryParse (substrings [1], out w);
+					int.TryParse (substrings [2], out h);
+					if (recieveResolution != null)
+						recieveResolution (w, h);
+				}
+
+				// pt,n,x,y,z
+				else if (substrings [0] == "pt" && substrings.Length >= 5) {
+					int DataNum = 0;
+					int.TryParse (substrings [1], out DataNum);
+
+					if (DataNum == 0 || substrings.Length < DataNum*3 + 2)
+						continue;
+
+					ArgsPosition[] myArgs = new ArgsPosition[DataNum];
+					for (int i = 0; i < DataNum; i++) {
+						int _x = 0;
+						int _y = 0;
+						int _z = 0;
+
+						int.TryParse (substrings [i*3 + 2], out _x);
+						int.TryParse (substrings [i*3 + 3], out _y);
+						int.TryParse (substrings [i*3 + 4], out _z);
+
+						myArgs [i] = new ArgsPosition { x = _x , y = _y , z = _z };
+
+					}
+					if (recievePositionEvent != null)
+						recievePositionEvent.Invoke (myArgs);
+
+				}
+
+				else if (substrings.Length > 2) {
 
 					int DataNum = 0;
 					int.TryParse (substrings [0], out DataNum);

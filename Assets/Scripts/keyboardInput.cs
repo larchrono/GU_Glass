@@ -42,7 +42,7 @@ public class keyboardInput : MonoBehaviour {
 				shooter.transform.Translate (0, 0, -speed * Time.deltaTime);
 		}
 		if (Input.GetButtonDown ("Fire1")) {
-			GameObject temp = Instantiate (baseBullet, shooter.transform.position, Quaternion.identity);
+			Instantiate (baseBullet, shooter.transform.position, Quaternion.identity);
 		}
 	}
 
