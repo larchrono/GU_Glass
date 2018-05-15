@@ -7,11 +7,13 @@ public class CameraController : MonoBehaviour {
 
 	public static CameraController current;
 
+	public Camera mainCamera;
 	public InputField textOrien;
 	public InputField textTrimming;
 
 	public Slider sliderCameraHeight;
 	public Slider sliderFieldofView;
+	public Slider sliderRollCorrection;
 
 	public Text cameraRotateData;
 	public Text devieceRawOrientation;
@@ -26,9 +28,13 @@ public class CameraController : MonoBehaviour {
 
 	//校正正視角度
 	public float trimming = 1;
+	//校正歪頭角度
+	public float rollCorrection = 0;
 
 	//detect the north direction compass in real world
 	public float initOrientDegree = 0;
+
+	public float nowAzimuth;
 
 	ScreenOrientation originOrientation;
 	enum Mode
@@ -52,7 +58,6 @@ public class CameraController : MonoBehaviour {
 		originOrientation = Screen.orientation;
 		if (originOrientation == ScreenOrientation.Portrait) {
 			appMode = Mode.Phone;
-			//Screen.orientation = ScreenOrientation.LandscapeLeft;
 		} else {
 			appMode = Mode.Glass;
 		}
@@ -70,18 +75,27 @@ public class CameraController : MonoBehaviour {
 		textTrimming.text = trimming.ToString ();
 		sliderCameraHeight.value = PlayerPrefs.GetFloat ("CameraHeight", 6);
 		sliderFieldofView.value = PlayerPrefs.GetFloat ("FieldofView", 60);
+		sliderRollCorrection.value = PlayerPrefs.GetFloat ("RollCorrection", 0);
 	}
 
 	// Update is called once per frame
 	void Update () {
 		//this.transform.position = new Vector3 (nowX, 0, nowY);
 		//this.transform.position = Vector3.Lerp (this.transform.position, new Vector3 (nowX, viewHeight, nowY), 0.1f);
-		cameraRotateData.text = transform.rotation.eulerAngles.ToString ();
+
+		cameraRotateData.text = mainCamera.transform.rotation.eulerAngles.ToString ();
 	}
 
 	void OnViewChanged(object sender, OrienArgs args){
+
+		//new verson, only for azimuth
 		devieceRawOrientation.text = "( " + args.O_X + " , " + args.O_Z + " , " + args.O_Y + " )";
 
+		nowAzimuth = args.O_Z;
+
+		return;
+
+		/*
 		if (appMode == Mode.Glass || (appMode == Mode.Phone && originOrientation == ScreenOrientation.Portrait)) {
 			float filter_Y = args.O_Y;
 			if (filter_Y < trimming && filter_Y > -trimming) {
@@ -95,25 +109,28 @@ public class CameraController : MonoBehaviour {
 			}
 			this.transform.rotation = Quaternion.Euler ((-args.O_Y + 90) * rotateRate, args.O_Z - initOrientDegree + 90 , filter_Y);
 		}
+		*/
 	}
 
+	public void UseNowAzimuth(){
+		textOrien.text = "" + nowAzimuth;
+	}
 
 	public void SetInitOrient(string src){
 		float temp = 0;
 		float.TryParse (src, out temp);
-		if (temp != 0) {
-			initOrientDegree = temp;
-			PlayerPrefs.SetFloat("Orien", initOrientDegree);
-		}
+
+		initOrientDegree = temp;
+		transform.rotation = Quaternion.Euler (new Vector3 (0 , -initOrientDegree, rollCorrection));
+		PlayerPrefs.SetFloat("Orien", initOrientDegree);
 	}
 
 	public void SetTrimming(string src){
 		float temp = 0;
 		float.TryParse (src, out temp);
-		if (temp != 0) {
-			trimming = temp;
-			PlayerPrefs.SetFloat("Trimming", trimming);
-		}
+
+		trimming = temp;
+		PlayerPrefs.SetFloat("Trimming", trimming);
 	}
 
 	public void SetCameraHeight(float src){
@@ -122,8 +139,15 @@ public class CameraController : MonoBehaviour {
 	}
 
 	public void SetFieldOfView(float src){
-		GetComponent<Camera> ().fieldOfView = src;
+		mainCamera.fieldOfView = src;
 		PlayerPrefs.SetFloat ("FieldofView", src);
+	}
+
+	public void SetRollCorrection(float src){
+		
+		rollCorrection = src;
+		transform.rotation = Quaternion.Euler (new Vector3 (0 , -initOrientDegree, rollCorrection));
+		PlayerPrefs.SetFloat ("RollCorrection", src);
 	}
 
 	public float Now_X { get { return nowX; } }
